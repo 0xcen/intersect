@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// TODO: Whenever you make changes to this file make sure to invoke 'prisma generate' afterwards
+// https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb/install-prisma-client-typescript-mongodb
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  pubKey   String    @unique
+  webhooks Webhook[]
+  apiKey   String    @unique
+}
+
+model Webhook {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  address String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @db.ObjectId
+  url     String
+}
