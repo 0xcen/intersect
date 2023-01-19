@@ -20,7 +20,7 @@ export class Helius {
   }: BaseWebhookProps): Promise<InitializedWebhook | null> => {
     try {
       const res = await axios.post<InitializedWebhook>(
-        baseURL + `?api-key=${process.env.NEXT_PUBLIC_HELIUS_KEY}`
+        baseURL + `?api-key=${process.env.HELIUS_API_KEY}`
       );
 
       if (!res.data) return null;
@@ -53,7 +53,7 @@ export class Helius {
     };
     try {
       await axios.put<InitializedWebhook>(
-        baseURL + webhookID + `?api-key=${process.env.NEXT_PUBLIC_HELIUS_KEY}`,
+        baseURL + webhookID + `?api-key=${process.env.HELIUS_API_KEY}`,
         body
       );
       return null;
@@ -74,12 +74,12 @@ export class Helius {
   static getAllWebhooks = async (): Promise<InitializedWebhook[] | null> => {
     console.log(
       '🚀 ~ file: helius.ts ~ line 78 ~ Helius ~ getAllWebhooks= ~ getAllWebhooks',
-      process.env.NEXT_PUBLIC_HELIUS_KEY
+      process.env.HELIUS_API_KEY
     );
 
     try {
       const res = await axios.get<InitializedWebhook[]>(
-        baseURL + `?api-key=${process.env.NEXT_PUBLIC_HELIUS_KEY}`
+        baseURL + `?api-key=${process.env.HELIUS_API_KEY}`
       );
 
       if (!res.data) return null;
@@ -104,7 +104,7 @@ export class Helius {
   ): Promise<InitializedWebhook | null> => {
     try {
       const res = await axios.get<InitializedWebhook>(
-        baseURL + webhookID + `?api-key=${process.env.NEXT_PUBLIC_HELIUS_KEY}`
+        baseURL + webhookID + `?api-key=${process.env.HELIUS_API_KEY}`
       );
       console.log('🚀 ~ file: helius.ts ~ line 112 ~ Helius ~ res', res);
 
@@ -128,7 +128,7 @@ export class Helius {
   static deleteWebhook = async (webhookID: string) => {
     try {
       const res = await axios.delete(
-        baseURL + webhookID + `?api-key=${process.env.NEXT_PUBLIC_HELIUS_KEY}`
+        baseURL + webhookID + `?api-key=${process.env.HELIUS_API_KEY}`
       );
       if (!res.data.entries().length) {
         console.log(`Webhook ${webhookID} successfully deleted`);

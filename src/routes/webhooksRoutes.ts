@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { Helius } from 'src/apis/helius';
-import prisma from 'src/prisma';
+import { Helius } from '../apis/helius';
+import prisma from '../prisma';
 
 const router = Router();
 
