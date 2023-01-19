@@ -14,6 +14,9 @@ app.use('/api/v1/addresses', addressesRoutes);
 app.use('/api/v1/transactions', transactionsRoutes);
 app.use('/api/v1/webhooks', webhooksRoutes);
 app.use('/api/v1/rpc', rpcRoutes);
+app.use('/api/v1/me', (req: Request, res: Response) => {
+  return res.send('ok');
+});
 
 app.get('*', (req: Request, res: Response) => {
   res.status(404).send('404 - Page Not Found');
