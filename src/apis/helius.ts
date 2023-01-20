@@ -4,6 +4,7 @@ interface BaseWebhookProps {
   webhookURL: string;
   transactionTypes: string[];
   accountAddresses: string[];
+  webhookType: string;
 }
 
 export interface InitializedWebhook extends BaseWebhookProps {
@@ -50,6 +51,7 @@ export class Helius {
       transactionTypes,
       accountAddresses,
       webhookURL,
+      webhookType: 'enhanced',
     };
     try {
       await axios.put<InitializedWebhook>(
@@ -58,8 +60,6 @@ export class Helius {
       );
       return null;
     } catch (error) {
-      console.log('🚀 ~ file: helius.ts ~ line 29 ~ error', error);
-
       if (axios.isAxiosError(error)) {
         console.log(
           '🚀 ~ file: helius.ts ~ line 31 ~ error.message',
@@ -72,11 +72,6 @@ export class Helius {
   };
 
   static getAllWebhooks = async (): Promise<InitializedWebhook[] | null> => {
-    console.log(
-      '🚀 ~ file: helius.ts ~ line 78 ~ Helius ~ getAllWebhooks= ~ getAllWebhooks',
-      process.env.HELIUS_API_KEY
-    );
-
     try {
       const res = await axios.get<InitializedWebhook[]>(
         baseURL + `?api-key=${process.env.HELIUS_API_KEY}`

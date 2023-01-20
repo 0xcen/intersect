@@ -4,7 +4,7 @@ const router = Router();
 
 // /api/v1/addresses
 router.route('/:address/transactions').get((req: Request, res: Response) => {
-  res.send(req.params.address);
+  res.json(req.params.address);
 });
 
 router.route('/:address/balance').get((req: Request, res: Response) => {});
