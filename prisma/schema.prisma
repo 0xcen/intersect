@@ -21,6 +21,8 @@ model User {
   webhooks Webhook[]
   stats    Stats?
 
+  created DateTime @default(now())
+
   @@map("users")
 }
 

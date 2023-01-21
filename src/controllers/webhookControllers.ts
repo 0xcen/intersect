@@ -53,7 +53,15 @@ export const subscribe = async (req: Request, res: Response) => {
 
 export const postToWebhook = async (req: Request, res: Response) => {
   const [newTx] = req.body;
+  let filter = newTx.description.split(' ')[0];
 
+  // escape any or unknow for now
+  if (newTx.type === 'ANY' || newTx.type === 'UNKNOWN' || !newTx.description)
+    return res.json({ status: 'ok' });
+
+  if (newTx.type.includes('NFT') && newTx?.events?.nft?.nfts[0]?.mint) {
+    filter = newTx.events.nft.nfts[0].mint;
+  }
   const isJupV4 =
     newTx.accountData.filter(
       (ad: any) => ad.account === 'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB'
@@ -64,7 +72,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
   try {
     //   1. get all items in db with address
     const allWebhooks = await prisma.webhook.findMany({
-      where: { address: newTx.feePayer },
+      where: { address: filter },
     });
 
     //  2. filter by eventType
@@ -80,6 +88,10 @@ export const postToWebhook = async (req: Request, res: Response) => {
     // every item must have a unique id
     res.json({ ...newTx, id: newTx.signature });
   } catch (error) {
+    console.log(
+      '🚀 ~ file: webhookControllers.ts:95 ~ postToWebhook ~ error',
+      error
+    );
     res.status(500).json(error);
   }
 };
