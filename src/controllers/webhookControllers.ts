@@ -83,3 +83,18 @@ export const postToWebhook = async (req: Request, res: Response) => {
     res.status(500).json(error);
   }
 };
+
+export const updateUrl = async (req: Request, res: Response) => {
+  const webhooks = await Helius.getAllWebhooks();
+
+  if (!webhooks) return res.status(404).json({ error: 'No webhook found' });
+  if (!req.body.webhookURL)
+    return res.status(404).json({ error: 'Bad request' });
+
+  const updatedWebhook = await Helius.updateWebhook({
+    ...webhooks[0],
+    webhookURL: req.body.webhookURL,
+  });
+
+  res.json(updatedWebhook);
+};
