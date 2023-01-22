@@ -18,7 +18,6 @@ export const subscribe = async (req: Request, res: Response) => {
       req.body
     );
 
-    // get or create webhook
     const wh = await Helius.getAllWebhooks();
 
     // todo: if wh [0] has more than 10k addresses, use a different webhook
@@ -32,7 +31,7 @@ export const subscribe = async (req: Request, res: Response) => {
             : [...wh[0].accountAddresses],
       });
     }
-    //   2. save webhook to db with eventType
+
     await prisma.webhook.create({
       data: {
         targetUrl: targetUrl,
@@ -53,14 +52,17 @@ export const subscribe = async (req: Request, res: Response) => {
 
 export const postToWebhook = async (req: Request, res: Response) => {
   const [newTx] = req.body;
-  let filter = newTx.description.split(' ')[0];
+  let filter = [
+    newTx.description.split(' ')[0],
+    newTx.description.split(' ').pop().replace('.', ''),
+  ];
 
   // escape any or unknow for now
   if (newTx.type === 'ANY' || newTx.type === 'UNKNOWN' || !newTx.description)
     return res.json({ status: 'ok' });
 
   if (newTx.type.includes('NFT') && newTx?.events?.nft?.nfts[0]?.mint) {
-    filter = newTx.events.nft.nfts[0].mint;
+    filter = [newTx.events.nft.nfts[0].mint];
   }
   const isJupV4 =
     newTx.accountData.filter(
@@ -70,17 +72,14 @@ export const postToWebhook = async (req: Request, res: Response) => {
   if (isJupV4) return res.json({ status: 'ok' });
 
   try {
-    //   1. get all items in db with address
     const allWebhooks = await prisma.webhook.findMany({
-      where: { address: filter },
+      where: { address: { in: filter } },
     });
 
-    //  2. filter by eventType
     const filteredWebhooks = allWebhooks.filter(
       wh => wh.eventType === newTx.type || wh.eventType === 'ANY'
     );
 
-    // 3. loop through and send to corresponding Zapier webhook
     filteredWebhooks.forEach(async wh => {
       await axios.post(wh.targetUrl, newTx);
     });
@@ -88,10 +87,6 @@ export const postToWebhook = async (req: Request, res: Response) => {
     // every item must have a unique id
     res.json({ ...newTx, id: newTx.signature });
   } catch (error) {
-    console.log(
-      '🚀 ~ file: webhookControllers.ts:95 ~ postToWebhook ~ error',
-      error
-    );
     res.status(500).json(error);
   }
 };

@@ -15,11 +15,6 @@ router.route('/:address/new').post(async (req: Request, res: Response) => {
     if (!msg) return res.json({ error: 'No message provided' });
 
     // Todo: resolve address to username
-    const username = await dialect.identity.resolve(address);
-    console.log(
-      '🚀 ~ file: dialectRoutes.ts:33 ~ router.route ~ username',
-      username
-    );
 
     validatePubKey(address);
 
@@ -44,7 +39,7 @@ router.route('/:address/new').post(async (req: Request, res: Response) => {
 
     const msgRes = await thread.send({ text: msg });
 
-    res.json(msgRes);
+    res.json({ status: 'success', message: msgRes });
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({ status: 'error', message: error.message });
