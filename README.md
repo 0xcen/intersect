@@ -1,4 +1,5 @@
 ![intersect-white-full](https://user-images.githubusercontent.com/75177443/214194157-afc41e02-9c48-49df-8584-725dc5edb37a.svg)
+
 Sandstorm Hackathon Submission - Jan 2023
 ---
 Intersect seamlessly brings on-chain data into any workflow through a Zapier integration.
