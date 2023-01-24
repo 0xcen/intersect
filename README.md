@@ -6,7 +6,7 @@ Helius and Intersect's API + Zapier app brings Solana data into +5000 apps.
 The Zapier app (under review) serves as a no-code hub for simple workflows or as a proxy for your own instance of this API (for advanced use-cases).
 
 
-[→ Demos](https://github.com/0xcen/intersect/new/main?readme=1#solana-to-google-sheets-using-intersect)
+[→ Demos](https://github.com/0xcen/intersect/tree/main#demos)
 
 [→ Deck](https://github.com/0xcen/intersect/files/10485766/Intersect-deck.pdf)
 
