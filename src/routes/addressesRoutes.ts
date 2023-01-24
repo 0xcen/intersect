@@ -9,12 +9,22 @@ router
   .get(async (req: Request, res: Response) => {
     const { address } = req.params;
     const { eventType } = req.query;
-    const { data: testRes } = await axios.get(
-      `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${process.env.HELIUS_API_KEY}`,
-      { params: { type: eventType ?? 'ANY' } }
-    );
+    try {
+      const { data: testRes } = await axios.get(
+        `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${process.env.HELIUS_API_KEY}`,
+        { params: { type: eventType ?? 'ANY' } }
+      );
 
-    res.json(testRes.map((tx: any) => ({ ...tx, id: tx.signature })));
+      res.json(testRes.map((tx: any) => ({ ...tx, id: tx.signature })));
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(
+          '🚀 ~ file: addressesRoutes.ts:20 ~ .get ~ error',
+          error.message
+        );
+        res.status(400).json({ status: 'error', message: error.message });
+      }
+    }
   });
 
 router.route('/:address/balance').get((req: Request, res: Response) => {});

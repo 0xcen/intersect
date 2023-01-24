@@ -22,33 +22,19 @@ router.route('/updateUrl').post(updateUrl);
 
 router.route('/:address/test').get(async (req: Request, res: Response) => {
   const { address } = req.params;
-  console.log(
-    '🚀 ~ file: webhooksRoutes.ts:25 ~ router.route ~ address',
-    address
-  );
+
   const { eventType } = req.query;
-  console.log(
-    '🚀 ~ file: webhooksRoutes.ts:27 ~ router.route ~ eventType',
-    eventType
-  );
+
   try {
     const { data: testRes } = await axios.get(
       `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${process.env.HELIUS_API_KEY}`,
       { params: { type: eventType ?? 'ANY' } }
-    );
-    console.log(
-      '🚀 ~ file: webhooksRoutes.ts:39 ~ router.route ~ testRes',
-      testRes
     );
 
     if (testRes.length === 0) {
       const { data: anyRes } = await axios.get(
         `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${process.env.HELIUS_API_KEY}`,
         { params: { type: 'ANY' } }
-      );
-      console.log(
-        '🚀 ~ file: webhooksRoutes.ts:46 ~ router.route ~ anyRes',
-        anyRes
       );
 
       return res.json(anyRes.map((tx: any) => ({ ...tx, id: tx.signature })));
