@@ -83,6 +83,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
     const allWebhooks = await prisma.webhook.findMany({
       where: { address: { in: filter } },
     });
+    console.log('🚀 allWebhooks', allWebhooks);
 
     const filteredWebhooks = allWebhooks.filter(
       wh => wh.eventType === newTx.type || wh.eventType === 'ANY'
@@ -96,6 +97,10 @@ export const postToWebhook = async (req: Request, res: Response) => {
     // every item must have a unique id
     res.json({ ...newTx, id: newTx.signature });
   } catch (error) {
+    console.log(
+      '🚀 ~ file: webhookControllers.ts:99 ~ postToWebhook ~ error',
+      error
+    );
     res.status(500).json(error);
   }
 };
