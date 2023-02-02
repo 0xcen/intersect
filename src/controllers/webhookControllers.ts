@@ -55,7 +55,13 @@ export const postToWebhook = async (req: Request, res: Response) => {
   let filter = [
     newTx.description.split(' ')[0],
     newTx.description.split(' ').pop().replace('.', ''),
+    newTx.feePayer,
+    ...Object.values(newTx.tokenTransfers[newTx.tokenTransfers.length - 1]),
   ];
+
+  // 1) check fee payer,
+  // 2) check last tokenTransfer's keys
+
   console.log('Recieved new Tx:', newTx.type);
   console.log('Filter', filter);
 
