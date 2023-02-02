@@ -56,7 +56,9 @@ export const postToWebhook = async (req: Request, res: Response) => {
     newTx.description.split(' ')[0],
     newTx.description.split(' ').pop().replace('.', ''),
     newTx.feePayer,
-    ...Object.values(newTx.tokenTransfers[newTx.tokenTransfers.length - 1]),
+    ...Object.values(newTx.tokenTransfers[newTx.tokenTransfers.length - 1]).map(
+      v => String(v)
+    ),
   ];
 
   // 1) check fee payer,
