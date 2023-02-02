@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "etsc",
-    "start": "node dist/server.js"
+    "start": "node dist/src/server.js"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
