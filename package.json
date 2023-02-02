@@ -44,5 +44,8 @@
     "ext": "ts,mjs,js,json,graphql",
     "exec": "etsc && node ./dist/src/server.js",
     "legacyWatch": true
+  },
+  "engines": {
+    "node": ">=16.13.0"
   }
 }
