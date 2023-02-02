@@ -56,8 +56,8 @@ export const postToWebhook = async (req: Request, res: Response) => {
     newTx.description.split(' ')[0],
     newTx.description.split(' ').pop().replace('.', ''),
   ];
-
   console.log('Recieved new Tx:', newTx.type);
+  console.log('Filter', filter);
 
   // escape any or unknow for now
   if (newTx.type === 'ANY' || newTx.type === 'UNKNOWN' || !newTx.description)
@@ -81,6 +81,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
     const filteredWebhooks = allWebhooks.filter(
       wh => wh.eventType === newTx.type || wh.eventType === 'ANY'
     );
+    console.log('filteredWebhooks', filteredWebhooks);
 
     filteredWebhooks.forEach(async wh => {
       await axios.post(wh.targetUrl, newTx);
