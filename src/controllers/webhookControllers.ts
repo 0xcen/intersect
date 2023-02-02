@@ -57,6 +57,8 @@ export const postToWebhook = async (req: Request, res: Response) => {
     newTx.description.split(' ').pop().replace('.', ''),
   ];
 
+  console.log('Recieved new Tx:', newTx.type);
+
   // escape any or unknow for now
   if (newTx.type === 'ANY' || newTx.type === 'UNKNOWN' || !newTx.description)
     return res.json({ status: 'ok' });
