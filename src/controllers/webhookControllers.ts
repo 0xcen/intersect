@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import { Helius } from '../apis/helius';
 import axios from 'axios';
 import * as z from 'zod';
+import { handleTokenMint } from '../utils/parsers';
+import { TransactionType } from 'helius-sdk';
 
 const subscriptionSchema = z.object({
   targetUrl: z.string().url().min(1),
@@ -51,31 +53,35 @@ export const subscribe = async (req: Request, res: Response) => {
 };
 
 export const postToWebhook = async (req: Request, res: Response) => {
-  const [newTx] = req.body;
+  let [payload] = req.body;
   let filter = [
-    newTx.description.split(' ')[0],
-    newTx.description.split(' ').pop().replace('.', ''),
-    newTx.feePayer,
-    ...Object.values(newTx.tokenTransfers[newTx.tokenTransfers.length - 1]).map(
-      v => String(v)
-    ),
+    payload.description.split(' ')[0],
+    payload.description.split(' ').pop().replace('.', ''),
+    payload.feePayer,
+    ...Object.values(
+      payload.tokenTransfers[payload.tokenTransfers.length - 1]
+    ).map(v => String(v)),
   ];
 
   // 1) check fee payer,
   // 2) check last tokenTransfer's keys
 
-  console.log('Recieved new Tx:', newTx.type);
-  console.log('Filter', filter);
+  console.log('Recieved new Tx:', payload.type);
 
   // escape any or unknow for now
-  if (newTx.type === 'ANY' || newTx.type === 'UNKNOWN' || !newTx.description)
+  if (
+    payload.type === 'ANY' ||
+    payload.type === 'UNKNOWN' ||
+    !payload.description
+  )
     return res.json({ status: 'ok' });
 
-  if (newTx.type.includes('NFT') && newTx?.events?.nft?.nfts[0]?.mint) {
-    filter = [newTx.events.nft.nfts[0].mint];
+  if (payload.type.includes('NFT') && payload?.events?.nft?.nfts[0]?.mint) {
+    filter = [payload.events.nft.nfts[0].mint];
   }
+
   const isJupV4 =
-    newTx.accountData.filter(
+    payload.accountData.filter(
       (ad: any) => ad.account === 'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB'
     ).length > 0;
 
@@ -85,18 +91,24 @@ export const postToWebhook = async (req: Request, res: Response) => {
     const allWebhooks = await prisma.webhook.findMany({
       where: { address: { in: filter } },
     });
-    console.log('🚀 allWebhooks', allWebhooks);
 
     const filteredWebhooks = allWebhooks.filter(
-      wh => wh.eventType === newTx.type || wh.eventType === 'ANY'
+      wh => wh.eventType === payload.type || wh.eventType === 'ANY'
     );
-    console.log('filteredWebhooks', filteredWebhooks);
-
     filteredWebhooks.forEach(async wh => {
-      await axios.post(wh.targetUrl, { ...newTx, id: newTx.signature });
+      switch (payload.type) {
+        case TransactionType.TOKEN_MINT:
+          payload = handleTokenMint(payload, wh.address);
+          break;
+        default:
+          payload = req.body[0];
+          break;
+      }
+
+      await axios.post(wh.targetUrl, { ...payload, id: payload.signature });
     });
 
-    console.log(JSON.stringify(newTx, null, 4));
+    console.log(JSON.stringify(payload, null, 4));
 
     // every item must have a unique id
     res.json();

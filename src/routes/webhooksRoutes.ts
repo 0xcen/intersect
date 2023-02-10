@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { Router, Request, Response } from 'express';
+import { EnrichedTransaction, TransactionType } from 'helius-sdk';
 import { protect } from '../controllers/authControllers';
 import {
   postToWebhook,
   subscribe,
   updateUrl,
 } from '../controllers/webhookControllers';
+import { handleTokenMint } from '../utils/parsers';
 
 const router = Router();
 
@@ -26,7 +28,7 @@ router.route('/:address/test').get(async (req: Request, res: Response) => {
   const { eventType } = req.query;
 
   try {
-    const { data: testRes } = await axios.get(
+    const { data: testRes } = await axios.get<EnrichedTransaction[]>(
       `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${process.env.HELIUS_API_KEY}`,
       { params: { type: eventType ?? 'ANY' } }
     );
@@ -40,7 +42,14 @@ router.route('/:address/test').get(async (req: Request, res: Response) => {
       return res.json(anyRes.map((tx: any) => ({ ...tx, id: tx.signature })));
     }
 
-    res.json(testRes.map((tx: any) => ({ ...tx, id: tx.signature })));
+    res.json(
+      testRes.map(tx => {
+        if (tx.type === TransactionType.TOKEN_MINT) {
+          return { ...handleTokenMint(tx, address), id: tx.signature };
+        }
+        return { ...tx, id: tx.signature };
+      })
+    );
   } catch (error) {
     // if axios error
     if (axios.isAxiosError(error)) {
