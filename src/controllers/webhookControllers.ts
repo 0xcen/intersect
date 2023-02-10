@@ -93,11 +93,13 @@ export const postToWebhook = async (req: Request, res: Response) => {
     console.log('filteredWebhooks', filteredWebhooks);
 
     filteredWebhooks.forEach(async wh => {
-      await axios.post(wh.targetUrl, newTx);
+      await axios.post(wh.targetUrl, { ...newTx, id: newTx.signature });
     });
 
+    console.log(JSON.stringify(newTx, null, 4));
+
     // every item must have a unique id
-    res.json({ ...newTx, id: newTx.signature });
+    res.json();
   } catch (error) {
     console.log(
       '🚀 ~ file: webhookControllers.ts:99 ~ postToWebhook ~ error',
