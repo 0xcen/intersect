@@ -96,7 +96,6 @@ export const postToWebhook = async (req: Request, res: Response) => {
       wh => wh.eventType === payload.type || wh.eventType === 'ANY'
     );
     for (let wh of filteredWebhooks) {
-      console.log('📬 Posting to: ', wh);
       switch (payload.type) {
         case TransactionType.TOKEN_MINT:
           payload = handleTokenMint(payload, wh.address);
@@ -106,7 +105,10 @@ export const postToWebhook = async (req: Request, res: Response) => {
           break;
       }
 
-      await axios.post(wh.targetUrl, { ...payload, id: payload.signature });
+      console.log('📬 Posting to: ', wh);
+      await axios
+        .post(wh.targetUrl, { ...payload, id: payload.signature })
+        .catch(console.log);
     }
     // every item must have a unique id
     res.json();
