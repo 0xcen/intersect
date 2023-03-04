@@ -61,12 +61,20 @@ export const postToWebhook = async (req: Request, res: Response) => {
     filter.push(payload.description.split(' ').pop()?.replace('.', ''));
   }
   if (payload.feePayer) filter.push(payload.feePayer);
-  if (payload.tokenTransfers)
+  if (payload.tokenTransfers.length > 0)
     filter.push(
       ...Object.values(
         payload.tokenTransfers[payload.tokenTransfers.length - 1]
       ).map(v => String(v))
     );
+
+  if (payload.nativeTransfers.length > 0) {
+    filter.push(
+      ...Object.values(
+        payload.nativeTransfers[payload.nativeTransfers.length - 1]
+      ).map(v => String(v))
+    );
+  }
 
   // 1) check fee payer,
   // 2) check last tokenTransfer's keys
