@@ -4,7 +4,7 @@ import { Helius } from '../apis/helius';
 import axios from 'axios';
 import * as z from 'zod';
 import { handleTokenMint } from '../utils/parsers';
-import { TransactionType } from 'helius-sdk';
+import { EnrichedTransaction, TransactionType } from 'helius-sdk';
 
 const subscriptionSchema = z.object({
   targetUrl: z.string().url().min(1),
@@ -54,14 +54,19 @@ export const subscribe = async (req: Request, res: Response) => {
 
 export const postToWebhook = async (req: Request, res: Response) => {
   let [payload] = req.body;
-  let filter = [
-    payload.description.split(' ')[0],
-    payload.description.split(' ').pop().replace('.', ''),
-    payload.feePayer,
-    ...Object.values(
-      payload.tokenTransfers[payload.tokenTransfers.length - 1]
-    ).map(v => String(v)),
-  ];
+  let filter = [];
+
+  if (payload.description) {
+    filter.push(payload.description.split(' ')[0]);
+    filter.push(payload.description.split(' ').pop()?.replace('.', ''));
+  }
+  if (payload.feePayer) filter.push(payload.feePayer);
+  if (payload.tokenTransfers)
+    filter.push(
+      ...Object.values(
+        payload.tokenTransfers[payload.tokenTransfers.length - 1]
+      ).map(v => String(v))
+    );
 
   // 1) check fee payer,
   // 2) check last tokenTransfer's keys
