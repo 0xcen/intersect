@@ -15,6 +15,7 @@ const router = Router();
 
 // to Zapier
 router.route('/').post(postToWebhook);
+router.route('/fun').post((req, res) => res.send('ok'));
 
 // to Helius
 router.route('/subscribe').post(protect, subscribe);

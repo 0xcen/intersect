@@ -1,10 +1,10 @@
-import prisma from '../prisma';
-import { Request, Response } from 'express';
-import { Helius } from '../apis/helius';
-import axios from 'axios';
-import * as z from 'zod';
-import { handleTokenMint } from '../utils/parsers';
-import { EnrichedTransaction, TransactionType } from 'helius-sdk';
+import prisma from "../prisma";
+import { Request, Response } from "express";
+import { Helius } from "../apis/helius";
+import axios from "axios";
+import * as z from "zod";
+import { handleTokenMint } from "../utils/parsers";
+import { EnrichedTransaction, TransactionType } from "helius-sdk";
 
 const subscriptionSchema = z.object({
   targetUrl: z.string().url().min(1),
@@ -43,7 +43,7 @@ export const subscribe = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(203).json({ status: 'ok' });
+    return res.status(203).json({ status: "ok" });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.message });
@@ -57,16 +57,19 @@ export const postToWebhook = async (req: Request, res: Response) => {
   let filter = [];
 
   if (payload.description) {
-    filter.push(payload.description.split(' ')[0]);
-    filter.push(payload.description.split(' ').pop()?.replace('.', ''));
+    filter.push(payload.description.split(" ")[0]);
+    filter.push(payload.description.split(" ").pop()?.replace(".", ""));
   }
   if (payload.feePayer) filter.push(payload.feePayer);
-  if (payload.tokenTransfers.length > 0)
+  if (payload.tokenTransfers.length > 0) {
     filter.push(
       ...Object.values(
         payload.tokenTransfers[payload.tokenTransfers.length - 1]
       ).map(v => String(v))
     );
+
+    filter.push(payload.tokenTransfers.map((t: any) => t.tokenMint));
+  }
 
   if (payload.nativeTransfers.length > 0) {
     filter.push(
@@ -79,26 +82,26 @@ export const postToWebhook = async (req: Request, res: Response) => {
   // 1) check fee payer,
   // 2) check last tokenTransfer's keys
 
-  console.log('Recieved new Tx:', payload.type);
+  console.log("Recieved new Tx:", payload.type);
 
   // escape any or unknow for now
   if (
-    payload.type === 'ANY' ||
-    payload.type === 'UNKNOWN' ||
+    payload.type === "ANY" ||
+    payload.type === "UNKNOWN" ||
     !payload.description
   )
-    return res.json({ status: 'ok' });
+    return res.json({ status: "ok" });
 
-  if (payload.type.includes('NFT') && payload?.events?.nft?.nfts[0]?.mint) {
+  if (payload.type.includes("NFT") && payload?.events?.nft?.nfts[0]?.mint) {
     filter = [payload.events.nft.nfts[0].mint];
   }
 
   const isJupV4 =
     payload.accountData.filter(
-      (ad: any) => ad.account === 'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB'
+      (ad: any) => ad.account === "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB"
     ).length > 0;
 
-  if (isJupV4) return res.json({ status: 'ok' });
+  if (isJupV4) return res.json({ status: "ok" });
 
   try {
     const allWebhooks = await prisma.webhook.findMany({
@@ -106,7 +109,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
     });
 
     const filteredWebhooks = allWebhooks.filter(
-      wh => wh.eventType === payload.type || wh.eventType === 'ANY'
+      wh => wh.eventType === payload.type || wh.eventType === "ANY"
     );
     for (let wh of filteredWebhooks) {
       switch (payload.type) {
@@ -118,7 +121,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
           break;
       }
 
-      console.log('📬 Posting to: ', wh);
+      console.log("📬 Posting to: ", wh);
       await axios
         .post(wh.targetUrl, { ...payload, id: payload.signature })
         .catch(console.log);
@@ -126,7 +129,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
     // every item must have a unique id
     res.json();
   } catch (error) {
-    console.log('🚩 Failed to post to webhook: ', error);
+    console.log("🚩 Failed to post to webhook: ", error);
     res.status(500).json(error);
   }
 };
@@ -134,9 +137,9 @@ export const postToWebhook = async (req: Request, res: Response) => {
 export const updateUrl = async (req: Request, res: Response) => {
   const webhooks = await Helius.getAllWebhooks();
 
-  if (!webhooks) return res.status(404).json({ error: 'No webhook found' });
+  if (!webhooks) return res.status(404).json({ error: "No webhook found" });
   if (!req.body.webhookURL)
-    return res.status(404).json({ error: 'Bad request' });
+    return res.status(404).json({ error: "Bad request" });
 
   const updatedWebhook = await Helius.updateWebhook({
     ...webhooks[0],
