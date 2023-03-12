@@ -68,7 +68,7 @@ export const postToWebhook = async (req: Request, res: Response) => {
       ).map(v => String(v))
     );
 
-    filter.push(payload.tokenTransfers.map((t: any) => t.tokenMint));
+    filter.push(...payload.tokenTransfers.map((t: any) => t.tokenMint));
   }
 
   if (payload.nativeTransfers.length > 0) {
