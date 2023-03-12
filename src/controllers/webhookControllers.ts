@@ -62,21 +62,25 @@ export const postToWebhook = async (req: Request, res: Response) => {
   }
   if (payload.feePayer) filter.push(payload.feePayer);
   if (payload.tokenTransfers.length > 0) {
-    filter.push(
-      ...Object.values(
-        payload.tokenTransfers[payload.tokenTransfers.length - 1]
-      ).map(v => String(v))
-    );
+    Object.values(payload.tokenTransfers[payload.tokenTransfers.length - 1])
+      .map(v => String(v))
+      .forEach(val => {
+        if (val) filter.push(val);
+      });
 
-    filter.push(...payload.tokenTransfers.map((t: any) => t.tokenMint));
+    payload.tokenTransfers
+      .map((t: any) => t.tokenMint)
+      .forEach((t: any) => {
+        if (t) filter.push(t);
+      });
   }
 
   if (payload.nativeTransfers.length > 0) {
-    filter.push(
-      ...Object.values(
-        payload.nativeTransfers[payload.nativeTransfers.length - 1]
-      ).map(v => String(v))
-    );
+    Object.values(payload.nativeTransfers[payload.nativeTransfers.length - 1])
+      .map(v => String(v))
+      .forEach(val => {
+        if (val) filter.push(val);
+      });
   }
 
   // 1) check fee payer,
