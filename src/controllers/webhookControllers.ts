@@ -54,6 +54,10 @@ export const subscribe = async (req: Request, res: Response) => {
 
 export const postToWebhook = async (req: Request, res: Response) => {
   let [payload] = req.body;
+  console.log(
+    "🚀 ~ file: webhookControllers.ts:57 ~ postToWebhook ~ payload:",
+    payload
+  );
   let filter = [];
 
   if (payload.description) {
